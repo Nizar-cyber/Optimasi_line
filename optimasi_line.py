@@ -1,7 +1,7 @@
 # ================================
 # Distribusi Line (3 line) – balance by CT
 # ================================
-st.write("### Line (3 Line) – Balanced by CT")
+st.write("### Line (3 Line) - Balanced by CT")
 line_groups = {1: [], 2: [], 3: []}
 line_mp = {1: 0, 2: 0, 3: 0}
 
