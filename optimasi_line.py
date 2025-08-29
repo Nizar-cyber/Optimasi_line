@@ -14,11 +14,36 @@ ct = st.number_input("Cycle Time (menit/unit)", min_value=0.1, step=0.1)
 qty = st.number_input("Planning Bulanan (unit)", min_value=0, step=1)
 
 if st.button("➕ Tambah Barang"):
-    st.session_state.barang.append({"Nama": nama, "CT": ct, "Qty": qty})
+    if nama:  # jangan kosong
+        st.session_state.barang.append({"Nama": nama, "CT": ct, "Qty": qty})
+        st.success(f"Barang '{nama}' berhasil ditambahkan!")
+    else:
+        st.warning("Nama barang tidak boleh kosong!")
 
+# ============================
+# Tampilkan Data, Edit & Hapus
+# ============================
 if st.session_state.barang:
     df = pd.DataFrame(st.session_state.barang)
     st.table(df)
+
+    st.subheader("✏️ Edit / Hapus Barang")
+    idx = st.selectbox("Pilih barang", range(len(df)), 
+                       format_func=lambda x: df.iloc[x]["Nama"])
+
+    edit_nama = st.text_input("Edit Nama Barang", value=df.iloc[idx]["Nama"], key="edit_nama")
+    edit_ct = st.number_input("Edit CT", min_value=0.1, step=0.1, value=float(df.iloc[idx]["CT"]), key="edit_ct")
+    edit_qty = st.number_input("Edit Qty", min_value=0, step=1, value=int(df.iloc[idx]["Qty"]), key="edit_qty")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("💾 Simpan Perubahan"):
+            st.session_state.barang[idx] = {"Nama": edit_nama, "CT": edit_ct, "Qty": edit_qty}
+            st.success(f"Barang '{edit_nama}' berhasil diupdate!")
+    with col2:
+        if st.button("🗑 Hapus Barang"):
+            removed = st.session_state.barang.pop(idx)
+            st.success(f"Barang '{removed['Nama']}' berhasil dihapus!")
 
 st.subheader("Parameter Produksi")
 jam_kerja = st.number_input("Jam Kerja (menit per hari)", value=430, step=10)
@@ -26,6 +51,9 @@ hari_kerja = st.number_input("Hari Kerja (per bulan)", value=20, step=1)
 max_mp_line = st.number_input("Max MP per Line", value=11, step=1)
 max_mp_stall = st.number_input("Max MP per Stall", value=4, step=1)
 
+# ======================
+# Kalkulasi Distribusi
+# ======================
 if st.button("🚀 Kalkulasi"):
     df = pd.DataFrame(st.session_state.barang)
     if df.empty:
@@ -96,3 +124,13 @@ if st.button("🚀 Kalkulasi"):
             st.write(f"- Takt Time: {takt:.2f} menit")
             st.write(f"- MP Dibutuhkan: {mp} orang (max {max_mp_stall})")
             st.write(f"- Kapasitas max/hari: {cap:.0f} unit")
+
+        # ================================
+        # Rangkuman per Barang
+        # ================================
+        st.write("### 📊 Rangkuman Total per Barang")
+        df_summary = df.copy()
+        df_summary["Unit/Day"] = (jam_kerja / df_summary["CT"]).astype(int)
+        df_summary["Unit/Month"] = df_summary["Unit/Day"] * hari_kerja
+
+        st.table(df_summary[["Nama", "CT", "Qty", "Unit/Day", "Unit/Month"]])
