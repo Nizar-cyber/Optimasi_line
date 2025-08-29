@@ -45,7 +45,7 @@ for ln in line_groups:
 # ================================
 # Distribusi Stall (4 stall) – balance by CT
 # ================================
-st.write("### Stall (4 Stall) – Balanced by CT")
+st.write("### Stall (4 Stall) - Balanced by CT")
 stall_groups = {1: [], 2: [], 3: [], 4: []}
 stall_mp = {1: 0, 2: 0, 3: 0, 4: 0}
 
